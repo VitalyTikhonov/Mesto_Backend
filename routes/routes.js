@@ -4,9 +4,13 @@ const router = require('express').Router();
 const path = require('path');
 const fs = require('fs');
 
-/* MIDDLEWARE. Это оно? */
-function readFileAsset(fileName) {
-  return fs.createReadStream(path.join(__dirname, '../data', fileName), { encoding: 'utf8' });
+/* MIDDLEWARE. Это оно? Похоже, нет(( */
+function readFileAsset(fileName, res) {
+  const readStream = fs.createReadStream(path.join(__dirname, '../data', fileName), { encoding: 'utf8' });
+  readStream.on('error', () => {
+    res.status(500).json({ error: 'На сервере произошла ошибка' });
+  });
+  return readStream;
 }
 
 function searchForUser(array, id) {
@@ -14,9 +18,8 @@ function searchForUser(array, id) {
 }
 
 function sendWholeJson(file, res) {
-  const readStream = readFileAsset(file);
   res.set({ 'content-type': 'application/json; charset=utf-8' });
-  readStream.pipe(res);
+  readFileAsset(file, res).pipe(res);
 }
 
 /* РУТЕРЫ */
@@ -29,7 +32,7 @@ router.get('/cards', (req, res) => {
 });
 
 router.get('/users/:id', (req, res) => {
-  const usersReadStream = readFileAsset('users.json');
+  const usersReadStream = readFileAsset('users.json', res);
   let users = '';
 
   usersReadStream.on('data', (data) => {
