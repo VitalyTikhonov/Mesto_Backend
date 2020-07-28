@@ -4,13 +4,15 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable no-unused-vars */
 /* eslint-disable linebreak-style */
+/* ИМПОРТ */
 const router = require('express').Router();
-
 const users = require('../data/users.json');
-const { cards } = require('../data/cards.json');
+const cards = require('../data/cards.json');
 
+/* ПЕРЕМЕННЫЕ */
 let userIndex;
 
+/* MIDDLEWARE. Это оно? */
 function isUserExistent(id) {
   return users.some((user, index) => {
     userIndex = index;
@@ -18,6 +20,15 @@ function isUserExistent(id) {
     return user._id == id;
   });
 }
+
+/* РУТЕРЫ */
+router.get('/users', (req, res) => {
+  res.send(users);
+});
+
+router.get('/cards', (req, res) => {
+  res.send(cards);
+});
 
 router.get('/users/:id', (req, res) => {
   if (!isUserExistent([req.params.id])) {
@@ -28,4 +39,5 @@ router.get('/users/:id', (req, res) => {
   res.send(users[userIndex]);
 });
 
+/* ЭКСПОРТ */
 module.exports = router;

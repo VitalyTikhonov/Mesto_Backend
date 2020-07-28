@@ -8,4 +8,8 @@ const { PORT = 3000 } = process.env;
 const app = express();
 app.listen(3000);
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/', routes);
+app.use(routes);
+app.use((req, res) => {
+  // eslint-disable-next-line quote-props
+  res.status(404).send({ 'message': 'Запрашиваемый ресурс не найден' });
+});
