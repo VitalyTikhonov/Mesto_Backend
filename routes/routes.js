@@ -1,42 +1,51 @@
-/* eslint-disable no-console */
-/* eslint-disable linebreak-style */
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable linebreak-style */
-/* eslint-disable no-unused-vars */
-/* eslint-disable linebreak-style */
 /* ИМПОРТ */
 const router = require('express').Router();
-const users = require('../data/users.json');
-const cards = require('../data/cards.json');
-
-/* ПЕРЕМЕННЫЕ */
-let userIndex;
+const path = require('path');
+const fs = require('fs');
 
 /* MIDDLEWARE. Это оно? */
-function isUserExistent(id) {
-  return users.some((user, index) => {
-    userIndex = index;
-    // eslint-disable-next-line eqeqeq
-    return user._id == id;
-  });
+function readFileAsset(fileName) {
+  return fs.createReadStream(path.join(__dirname, '../data', fileName), { encoding: 'utf8' });
+}
+
+function searchForUser(array, id) {
+  return array.find((user) => user._id === id.toString());
+}
+
+function sendWholeJson(file, res) {
+  const readStream = readFileAsset(file);
+  res.set({ 'content-type': 'application/json; charset=utf-8' });
+  readStream.pipe(res);
 }
 
 /* РУТЕРЫ */
 router.get('/users', (req, res) => {
-  res.send(users);
+  sendWholeJson('users.json', res);
 });
 
 router.get('/cards', (req, res) => {
-  res.send(cards);
+  sendWholeJson('cards.json', res);
 });
 
 router.get('/users/:id', (req, res) => {
-  if (!isUserExistent([req.params.id])) {
-    res.status(404).send({ message: 'Нет пользователя с таким id' });
-    return;
-  }
+  const usersReadStream = readFileAsset('users.json');
+  let users = '';
 
-  res.send(users[userIndex]);
+  usersReadStream.on('data', (data) => {
+    users += data;
+  });
+
+  usersReadStream.on('end', () => {
+    users = JSON.parse(users);
+
+    if (!searchForUser(users, [req.params.id])) {
+      res.status(404).send({ message: 'Нет пользователя с таким id' });
+      return;
+    }
+
+    res.send(searchForUser(users, [req.params.id]));
+  });
 });
 
 /* ЭКСПОРТ */
