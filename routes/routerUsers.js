@@ -1,19 +1,15 @@
 /* eslint-disable no-underscore-dangle */
 /* ИМПОРТ */
-const router = require('express').Router();
+const routerUsers = require('express').Router();
 
 const { readFileAsset, searchForUser, sendWholeJson } = require('../helpers/helpers.js');
 
 /* РУТЕРЫ */
-router.get('/users', (req, res) => {
+routerUsers.get('/users', (req, res) => {
   sendWholeJson('users.json', res);
 });
 
-router.get('/cards', (req, res) => {
-  sendWholeJson('cards.json', res);
-});
-
-router.get('/users/:id', (req, res) => {
+routerUsers.get('/users/:id', (req, res) => {
   const usersReadStream = readFileAsset('users.json', res);
   let users = '';
 
@@ -34,4 +30,4 @@ router.get('/users/:id', (req, res) => {
 });
 
 /* ЭКСПОРТ */
-module.exports = router;
+module.exports = routerUsers;
